@@ -1,0 +1,217 @@
+<!-- 
+    #3.0 What is a Server?
+        인터넷에 연결된 컴퓨터.
+        종류 : 하드웨어 서버(영상에서 본 물리적인 기계들)
+                소프트웨어 서버(URL에 응답, 접속을 인가/비인가해주는 역할)
+
+        insfect->검사하다 
+
+    #3.1 What is Express? (감정의견 등을) 나타내다, 표현하다
+        Express.js는 프레임워크(아주아주 긴 코드를 짧게 줄인거지 뭐). 이미 안정화된 ! 프레임워크 중 하나지 !
+        서버를 만든다면 Express.js를 써서 몇줄 줄만에 만들 수 있다.
+        
+        Ruby -> Rails
+        Laravel -> php
+        JS -> Nodejs에서 동작하는거지 ! Super fucking Pupular !
+
+    # 3.2 Installing Express with NPM
+        터미널에서 npm init 후 package.json 설치를 안하면 후에 
+        npm i express할때 경로를 못읽어서 다른곳에 설치하니 주의할것
+        만약 친구랑 협업해서 한다면 package.json파일이랑 써있는 main파일만 있으면 npm install를 치면 package안의 dependency를 통해 다 설치된다
+    
+    # 3.3 Your frist express sever -> 진짜 첫서버 개설 완료...
+        https://nomadcoders.co/wetube/lectures/12
+        git push origin master -> 안될시 git remote set-url origin https://minsoo59@github.com/minsoo59/프로젝트명.git
+    
+    # 3.4 HTML : 
+        GET -> 브라우저가 GET메서드를 실행. 
+        GET request로는 정보전달 x 단순히 페이지를 가져오는 것
+        POST(게시하다, 포스팅하다) 
+        -> 웹사이트에 로그인하면 POST. 브라우저가 웹사이트에 정보를 전달.
+        POST request로는 정보전달 o       
+        예를들어 영상에 댓글을 단다치면 post request를 만들어야함. 왜냐면 정보를 전달해야하거든.
+        그러면 서버가 작동할텐데 이건, 그걸 저장하겠다는 의미가 아니라 우리가 적합한 http method를 사용한다는 말.
+    
+    # 3.5 ES6 NodeJS using Babel
+        브라우저에서 동작할 때 다시 신코드를 구 코드로 변환해주는 역할을 함.
+        // 신코드(ES6~)를 이용할 수 있게 해주는 모듈(?) 이며, es6이상의 최신코드를 옛날코드로 변환시켜주니
+        화면상테 표시할때 유용
+        npm i @babel/node -> npm i @babel/preset-env -> npm i @babel/core
+        -> babel-node init.js
+
+        수정할떄마다 자동으로 서버스타트하기 위해 nodemon설치
+        뒤에 -D 를 붙이면 package.json devDependencies에 설치됨 사용자에게 필요한게 아니라 프로그래머에게
+        필요할때 이렇게 설치함
+        npm i nodemon -D -> nodemon --exec babel-node init.js 
+        개발자를 위한 윈도우 셋업 강의를 통해 WSL을 설치한 상태에서는 nodemon이 restarting 안되는 이슈가 있음.
+        그럴때는 nodemon --legacy-watch --exec babel-node init.js
+
+        nodemon --legacy-watch --exec babel-node init.js --delay 2
+        --delay 2를 추가해서 저장할 때마다 2초를 기다렸다가 서버를 시작하는데
+        이렇게 하면 babel이 변환을 완료할 때까지 기다려줄 수 있는 것.
+
+    # 3.6 Express Core : Middlewares
+        Middlewares 처리가 끝날때까지 연결되어있는것. 
+        보통 완료전에 중간(유저와 마지막 응답 사이)에 뭔가가 있게 되는데, 그것을  Middlewares 함 -> 라우트(유저)와 실행하는 콜백함수(응답) 사이에서 동작하는 함수.
+        express에서의 모든 함수는 Middlewares 될수있음.
+        모든 미들웨어함수는 유저- 응답 사이에서 동작하므로 미들웨어가 끝나고 난 뒤, 
+        응답(콜백함수)를 실행하기 위해서 next() 가 필수적임. 혹은 미들웨어에서 *중단시킬 수 있음.
+        보통 실행될떄 위에서부터 아래순으로 실행되니 Middlewares는 위쪽에 있어야함(app.use(betweenHome))
+
+        각각 적용 -> 라우팅-콜백 사이에 직접 위치시켜줌
+        모두 적용 -> app.use() -> 해당 코드 아래에 있는 모든 코드에 적용됨
+        
+    # 3.7 주요 Middlewares
+        모르는 옵션 같은 것은 npm 사이트에서 검색해서 찾을 것!!
+        1. npm i morgan -> import morgan from "morgan" 
+            요런식으로 로그를 남겨줌-> GET / 404 3.076 ms - 139
+        2. npm i helmet -> import helmet from "helmet" 기초보안담당함
+        3. npm i cookie-parser -> import cookieParser from "cookie-parser" 쿠키를 다룰 수 있음
+        4. npm i body-parser -> import bodyParser from "body-parser" form데이터를 서버로 받아와서 활용가능함.
+
+    # 3.8 Express Core : Routing
+        es6라는게 모듈이라는 게 있어서 다른 파일에서의 코드를 가져다가 사용할 수 있음!!
+        for example -> 위에 미들웨어morgan, helmet like.. import해서 가져왔지
+        ES 6 모듈 사용법
+            export default app; → import app from "./app";
+            export const 변수명; → import { 변수명 } from "./파일명";
+        Router
+            express.Router();
+            라우트를 카테고리별로 쪼개서 묶을 수 있음.
+            그럼 주소가 /user/~~~ /video/ ~~~ 이런식으로 나뉠 수 있음.
+        app.use 
+            use의 의미는 누군가 ~~ 경로에 접속하면 해당 router 전체를 사용하겠다는 의미다.
+
+    # 3.9 MVC Patten
+        MVC-> C
+        Model -> data 이건 DB인데 나중에 배울것임
+        View  -> how does the data look(데이터가 어떻게 생겼는지) 
+            이건 templete인데 아직 우리가 안배웠음.
+        Control -> funtion that looks for the data(데이터를 보여주는 함수)
+        patten은 구조같은것. 설치하는게 아니라 배워서 이력서에 머 쓰는게 아니라 걍 패턴!!!      
+    # 3.10 MVC Patten
+        routers 파일생성 -> gloablRouter.js, userRouter.js, videoRouter.js 생성
+        routes.js 생성 -> 주소마다 url 주소정의 export default routes.js
+        app.use(routes.home, globalRouter);
+        gloablRouter.js 들어가면
+        globalRouter.get(routes.home, (req, res) => res.send("home"));
+        이런식으로 라우터스주소, 함수
+    # 3.11 MVC Patten - Controllers
+        routers 파일의 (req, res) => res.send("home") 세부분리
+        controllers 파일 생성 -> usercontroller.js, videocontroller.js 생성
+        export const home = (req, res) => res.send("home"); 코드 작성
+
+        대개 프로젝트에 있는 각 모델마다 컨트롤러를 만들게 됨
+        컨트롤러는 어떤 일이 어떻게 발생하는지에 관한 로직
+    # 3.12 Recap
+ -->
+
+<!-- 
+    MVC-> V
+    # 3.13 Installing Pug
+        npm i pug -> set함수에는 이름과 value가 필요. 
+        우리는 view engine의 설정을 바꿀꺼임.  view engine의 기본 설정값은 undefined
+        app.js에서 app.set('view engine', 'pug')
+        pug과 express에는 view파일들의 위치에 관한 기본설정이 있음.
+        만약 그 설정을 바꾸고 싶다면, 'views' 설정을 바꾸면 됨.
+        views파일 생성 -> home.pug 생성
+        pug는 템플릿 언어임. express의 view engine이지
+        put는 html 파일들이 더 아름답게 보이도록 만들어줌! <p>Hello!</p>대신 p Hello
+        conrollers파일의 컨트롤러들의 send메서드대신에 render를 사용
+
+    # 3.14 Layouts with Pug
+        pug와 같은 것들로 작업하면 HTML, CSS의 반복작업을 안해도 됨. 이것만 할 줄 알면!
+        layouts 파일 생성 -> main.pug 생성(이 파일은 모든 페이지들의 토대가 되는 파일)
+
+        block content
+        무조건 block content를 레이아웃에 추가해야 다른 페이지의 내용들이 채워진다.
+        block이 창문이라 상상하면 됨. 창문을 생성하고 나머지로 채우는것
+
+        block content를 쓰고싶다면 쓰고싶은 파일에 extends layouts/main.pug
+        그리고 해당 파일에 복사할 부분 block content 추가하고 다음 라인에 쓸내용 ㄱㄱ
+
+    # 3.15 Partials with Pug
+        Partials은 페이지의 일부분이야! -> 조직적인 목적으로만 만들어짐
+        footer, header 만짐. 
+        https://fontawesome.com/icons?d=gallery&p=1 -> 들어가서 footer icon 찾기
+        내정보 -> font awsome cdn -> link 복사
+        이제 해당 아이콘은 검색해서 선택 -> 코드복사
+        footer.footer
+        div.footer__icon 복사한코드도 pug방식으로 바꿔줄것
+        main에 footer대신 inclide 경로
+
+        
+        One single source of truth(한 곳에서만 정보를 보관) -> 더 나은 코드를 만들어주는 법칙!
+        이런 방식으로 코드가 조직된다면, 버그를 최소화할 수 있음!
+        왜? 많은 곳에 영향을 주는 하나를 바꾼다면, 그 하나만 바꿔주면 많은 것들이 바뀌거든.
+        같은 것을 가리키는 분리된 많은 것들을 수정하는 것보다 더 좋아
+
+        Javasciprt 코드 추가하고 싶다면 #{코드}
+    # 3.16 Local Variables in Pug
+        locals 미들웨어 만들기
+        1. local 변수를 global 변수로 사용하도록 해주는 것
+        2. local 기능을 통해 변수에 접근 가능
+        3. 라우터들 보다 상위에 위치시켜야 모든 라우터에도 공통적용이 가능함
+
+        ###middleware.js 파일###
+        const localsMiddleware = (req, res, next)=>{
+        res.locals.siteName = "WeTube";
+        }
+        이런 식으로 만들었다 치면, locals 안에 있는 건 템플릿에 변수명 처럼 존재함.
+
+        locals에 로컬 변수를 저장하면 이 변수를 view안에 있는 템플릿(.pug파일)들에서 사용 할 수 있다 => 템플릿을 직접 수정하지 않고, locals 내부의 변수들만 수정하면 된다.
+        ==>이 미들웨어는 코드 사이에 들어가 있기 때문에, next() 를 호출해야한다. 다음 함수들로 넘어가야하기 때문이다.
+    # 3.17 Template Variables in Pug     
+        한 템플릿에만 변수를 추가하는 법
+        export const home = (req, res) => res.render("home", { pageTitle: "Home" });
+        render 함수의 첫번째 인자는 템플릿이고, 
+        두번째 인자는 템플릿에 추가할 정보가 담긴 객체. 
+        -> 이것이 변수를 템플릿에 전달하는 방식. 전달하고 싶은 건 무엇이든 전달할 수 있다.
+        
+        이정도면 MVC의 V부분을 배웠다고 할 수 있다.
+
+
+
+
+    # 3.18 Search Controller
+        **queryString에 대하여..**
+
+    사용자가 입력 데이터를 전달하는 방법중의 하나로, 
+    url 주소에 미리 협의된 데이터를 파라미터를 통해 넘기는 것을 말한다.
+
+    1. HTML(PUG)에서 form + input 으로 정보를 보낸다. 여기서 form태그는 get방식이어야하며, input태그의 name값이 쿼리이름이 된다.
+    2. Controller에서, req.query << 로 input의 name값으로 보낸 데이터를 받는다.
+    3. 그리고 위 데이터를 다시 PUG로 전달해서 받아준다.
+
+    # 3.19 Join : Log in HTML
+
+    BEM = Block, Element , Modifier
+    Block__Element--Modifer     
+
+    # 3.20 Change Profile HTML
+
+    [수업내용]
+    userEditProfile << 을 작성함.
+    아바타부분, ( 파일올리기)
+    이름
+    이메일
+    그리고 비밀번호바꾸기 까지.
+    그리고 마지막에, link걸어서 비밀번호바꾸기 까지 작성함.
+    label(for) / Avatar (id) 를 준 이유, = 클릭의 유효범위를 확장시켜줄 때 사용함.
+
+    # 3.21 Home Controller
+    DB에 무엇을 추가해야할지 설정하기 전에 빠르게 수정하기 위해
+    videoEdit 부분 delete 로가는 :id << 이부분이 인식되는 것 수정해야함
+
+        [Fake DB]
+        Fake DB 를 생성함. [] 배열 내에, 객체 {} 로 하나씩 생성.
+        이전에, pug에 데이터를 전해줬던 것처럼, videos << 이것도 컨트롤러에서 임포트 해온뒤에 퍼그에 전달해줌.
+        그리고 Home.pug로 가서,
+        each in << 문을 사용하는데, for in 문이나, forEach와 상당히 유사함.(배열 내 데이터를 반복해서 돌면서 모두 가져오는 것)
+        each 변수명 in (가져올 데이터)
+        변수.title 하면 데이터의 title값을 가져오는 방식.
+
+        에러있었는데 이슈에서 찾음. 
+        videoRouter.js 
+        videoRouter.get(routes.video, video); -> 정의되지 않은 문장 지워야했음
+  -->
