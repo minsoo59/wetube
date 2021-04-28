@@ -214,4 +214,28 @@
         에러있었는데 이슈에서 찾음. 
         videoRouter.js 
         videoRouter.get(routes.video, video); -> 정의되지 않은 문장 지워야했음
+    # 3.22 Home Controller two
+        mixins 생성    
+    # 3.23 Join Controller
+        search 화면 작업
+        - Search 페이지 만들기 (헤더 + 비디오블록적용)
+        - Join(회원가입부분) get과, post 방식 쪼개서 처리, bodyParser의 필요성 확인!
+        - userController에서 post처리부분에서 비밀번호&비번확인 대조하는 작업 처리.
+    # 3.24 Log In and User Profile Controller
+        Login을 앞서 2.23에서 했던 방식을 이용해 똑같이 get & post로 분리함.
+        views에서 header부분을 Authenticated(인증됨)에 따라서 리스트를 다르게 보이게 해줬음.
+        :id라고 인식되는 부분을, router에 조건을 붙여 함수로 만듦으로써 해결해줌. id가 존재하면 이렇게 ~ 없으면 저렇게~
+    #3.25 More Controlers
+        1. VideoBlock에 a태그를 적용해, 비디오 상세페이지로 다이렉션 구현.
+        2. Logout 처리 - redirection & logout pug페이지 삭제
+        3. upload - Get & POST 처리 구현
+
+        - 2장 후반부 핵심정리 -
+        1. POST & GET
+        2. :id 처리
+        3. Mixin
+        4. Fake DB 사용법
+        5. Query
+
+        ++ 요점 : 라우팅 처리를 개잘해야한다.
   -->
