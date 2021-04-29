@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-
+// Schema : (계획·이론의) 개요[윤곽]
 const VideoSchema = new mongoose.Schema({
   fileUrl: {
     type: String,
