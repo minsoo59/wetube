@@ -1,8 +1,14 @@
-import { videos } from "../db";
 import routes from "../routes";
+import Video from "../models/Video";
 // pug쓸려면 send 대신 render그리고 함수의 인자로 안에는 템플릿 파일명을 입력하면됨
-export const home = (req, res) => {
-  res.render("home", { pageTitle: "Home", videos });
+export const home = async (req, res) => {
+  try {
+    const videos = await Video.find({});
+    res.render("home", { pageTitle: "Home", videos });
+  } catch (error) {
+    console.log(error);
+    res.render("home", { pageTitle: "Home", videos: [] });
+  }
 };
 
 export const search = (req, res) => {

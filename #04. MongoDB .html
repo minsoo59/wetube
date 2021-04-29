@@ -5,6 +5,42 @@
         wsl ubuntu로 설치하는 분들
         https://dev.to/seanwelshbrown/installing-mongodb-on-windows-subsystem-for-linux-wsl-2-19m9
         여기 참고하세요
+
     #4.1 Connecting to MongoDB
-    npm install dotenv
+        npm install dotenv
+
+    #4.2 Configuring Dot Env
+    configure (컴퓨터의) 환경을 설정하다
+        사용법 =>
+        import dotenv
+        dotenv.config();
+        이렇게 셋팅하고,
+        process.env.만든변수 << 이렇게 사용함.
+
+    #4.3 Video Model
+        몽고db의 장점은 document를 줄여준다는것. document는 -> package.JSON file 보면됨
+
+    #4.4 Comment Model 
+        [Schema]
+        model의 형식. model이 가져야 할 필수 요소들의 틀을 만들어줌.
+
+        [Relationship]
+        서로 다른 Schema를 가진 서로 다른 데이터가 문맥상(웹 상에서) 연관성을 가지고 있을 때 서로의 Schema를 ref를 통해 연결 시켜준다.
+        다만, 데이터를 통으로 연결 시켜주는 것이 아닌, id(=데이터의 이름)만 넘겨주는 방식.
+
+    #4.5 Home Controller Finished
+        기본적으로 JavaScript는 한번에 많은 일을 할 수 있기에
+        JS - async(Javascript 야 function의 어느부분은 꼭 기다려야해!라고 이야기하는것과같음)의 
+        await코드를 써서 값을 다 받아서 주기전까지 . 그리고 find말고도 할수 있는거 많음 find쳐보면 많이 나오니까 참고할것
+        다음render코드가 실행되지 않게 해야함.
+        해당과정이 성공적으로 끝나야 하는게 아니라 그냥 끝날 때까지 기다리는 것임!
+        예를 들어 에러가 생기더라도 다음 render실행함. 왜냐면 끝났거든!
+
+        try catch -> error가 생기면 default로 잡아내지 못함. 이건 NodeJS문제임.
+        안쓰면 에러가 날경우 NodeJS가 진행되지않음....
+
+    #4.6 Uploading and Creating a Video
+
+
+
  -->
