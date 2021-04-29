@@ -1,4 +1,7 @@
+import multer from "multer";
 import routes from "./routes";
+
+const multerVideo = multer({ dest: "uploads/video/" });
 
 // locals가 추가되면 그것들을 템플릿, 컨트롤러, 어디에서든 쓸수 있음!!
 export const localMiddlewate = (req, res, next) => {
@@ -10,3 +13,5 @@ export const localMiddlewate = (req, res, next) => {
   };
   next();
 };
+
+export const uploadVideo = multerVideo.single("videoFile");
