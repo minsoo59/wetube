@@ -1,0 +1,78 @@
+<!-- 
+    npm install webpack webpack-cli
+    npm install extract-text-webpack-plugin@next
+    npm install css-loader postcss-loader sass-loader
+    npm install autoprefixer
+    npm inatall node-sass
+
+    webpack.config.js 생성
+    package.json으로 와서 start명령어를 dev:server바꾸고
+    asset : 자산
+    dev:assets : "WEBPACK_ENV=development webpack"추가 -> 
+    build:assets : "WEBPACK_ENV=production webpack"추가 
+
+
+    webpack은 서버코드랑 상관없음. 이건 명확하게 클라이언트 코드임.
+    즉, 우리가 앞서 예쁜 코드를 작성할 수 있도록 만든 babel-node는 아직 쓸 수 없음.
+    여기엔 옛날 자바스크립 코드를 써야함
+
+    webpack.config.js에서
+    const path = require("path");
+    const autoprefixer = require("autoprefixer")
+    const ExtractCSS = require("extract-text-webpack-plugin")
+
+    const MODE = process.env.WEBPACK_ENV;
+    const ENTRY_FILE = path.resolve(__dirname, "assets", "js", "main.js")
+    const OUTPUT_DIR = path.join(__dirname, "static")
+    const config = {
+        entry : ENTRY_FILE,
+        mode : MODE,
+        module : {
+            rules: [
+                {
+                    test: /\.(scss)$/,
+                    use: ExtractCSS.extract([
+                        {
+                            loader: "css-loader"
+                        },
+                        {
+                            loader: "postcss-loader",
+                            option:{
+                                plugin(){
+                                    return [autoprefixer({ browsers: "cover 99.5%" })]
+                                }
+                            }
+                        },
+                        {
+                            loader: "sass-loader"
+                        }
+                    ])
+                }
+            ]
+        }
+        output: {
+            path : OUTPUT_DIR
+            filename : "[name].[js]"
+        },
+        plugins: [new ExtractCSS("styles.css")]
+    };
+
+    module.exports = config;
+    assets 폴더 생성
+    그후 js폴더와 main.js 생성 
+    그후 js폴더안에 scss 폴더생성하고 styles.scss생성, 
+    scss 폴더안에 config폴더 생성 
+    config폴더안에 _variables.scss 생성
+
+    main.js에서는 모던 js 문법써서 import
+    import "../scss/styles.scss"
+
+    styles.scss
+    @import "/.config/_variables.scss";
+    body{
+        background-color:$bgColor;
+    }
+
+    _variables.scss
+    $bgColor: red;
+ -->
