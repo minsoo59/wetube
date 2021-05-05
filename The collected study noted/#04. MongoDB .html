@@ -1,0 +1,243 @@
+<!-- 
+    MongoDB 복습 check -> 1 (210505)
+
+    #4.00 MongoDB and Mongoose
+
+        MongoDB는 NoSQL이다. 디비종류는 SQL, NoSQL 두가지
+        able to more less rules and orders DB
+        wsl ubuntu로 설치하는 분들 -> https://dev.to/seanwelshbrown/installing-mongodb-on-windows-subsystem-for-linux-wsl-2-19m9
+
+        JS에서 mongoDB와 연결하려면 adapter필요 -> mongoose
+        
+    #4.01 Connecting to MongoDB
+        
+        mongoose.connect(
+            'mongodb://localhost:port/we-tube', -> 지금은 localhost에 설치된 mongoDB지만 다른 곳에 설치 된다면 어캐될까? 네 코드에 있는 URL로부터 유저 데이터를 보는 걸 원하지 않을거야.
+            {
+                useNewUrlParser:true,
+                useFindAndModify:false
+            } -> 이렇게 적은 이유, 새버전 mongoose는 이런식으로 configuration 보낼수있음. 새버전에는 이것들이 기본으로 되어있을꺼야. 그래도 확실하게 해두자.
+        )
+
+    #4.02 Configuring Dot Env : configure (컴퓨터의) 환경을 설정하다
+
+        dotenv -> 숨기고 싶은 부분 숨기는 기능.
+            환경변수(Enviroment Variable) 쓰는 법
+                1. create .env file 
+                2.db.js에서 import dotenv,  dotenv.config(); <-이렇게 셋팅.
+                    mongoose.connect() 안에 몽고주소 delete 
+                    process.env.설정변수(.env file안에) writing
+                3..gitignore에 .env있는지 확인     
+                4. init.js에도 똑같이 적용후 const port = process.env.PORT || 4000; < 이렇게 하면 키가 다른곳에서 안보임  
+
+    #4.03 Video Model
+
+        몽고db의 장점은 document를 줄여준다는것. document는 -> package.JSON file 보면됨
+        하지만 mongoDB에게 우리파일이 어떻게 생겨야할지 알려줘야함. 아무거나 생성할 수 없다는 것.
+        file에 보안은 아니고 타당성이 어느정도 필요한 것. 
+            -> 우리의 file들은 video라는 이름을 가질거야. 그리고 모든 비디오들은 string type이고 그 string이름은 title...
+        
+        1. Create models folder 
+        2. Create Video.js -> 여기서 나의 video들의 형태를 정의.
+            import mongoose from "mongoose"
+            해야할 것 1) [Model] -> document name 2) [Schema] -> model의 형식. model이 가져야 할 필수 요소들의 틀을 만들어줌. 
+            const VideoSchma = new mongoose.Schma({
+                fileUrl: {type: String, required: "File URL is required"},
+                title: {type: String, required: "Title is required"},
+                description: String,
+                views: {type: Number, default: 0},
+                createdAt: {type: Date, default: Date.now},
+            }) -위의 schema에 사용할 수 있는 속성 알고 싶다면 -> https://mongoosejs.com/docs/guide.html 
+            const model = mongoose.model("Video", VideoSchema);
+             -> definition을 통해 실제 document를 만드는것. schema가 definition같은거야
+            export default model;
+         
+        영상 마지막에 import를 db.js가 아닌 init.js에 한 이유
+            -> DB상에서 SQL대신 JS로 스키마를 생성하는 과정이기에. 
+            음...일단 댓글들 찾아보고 정리한거지만 확신이 안가서 댓글로 질문해둠. 나중에 확인할것!
+            https://nomadcoders.co/wetube/lectures/38/comments/44116
+
+    #4.04 Comment Model 
+
+         1. Create Comment.js 
+         2. import mongoose from "mongoose"
+            const CommentSchema = new mongoose.Schema({
+                text: {type: String, required: "Text is required"},
+                createdAt: {type: Date, default: Date.now},
+            });
+            const model = mongoose.model("Comment", CommentSchema);
+            export default model;
+            한쪽에서는 video를 생성하고 다른쪽에서 comment를 생성했을때
+            어떻게 그 둘을 연관시킬까? 둘 사이에 어떠한 관계가 있는데 이걸 어떻게 연관시킬까?
+            comment에 video의 ID를 저장하거나 video가 ID의 array를 가지고 있는것.
+            어떤게 어떤 것과 연결되어 있는지 알아야하거든
+            video에 comment를 달때, 이 comment는 어떤 video와 직접적으로 연결되어 있는지
+            방법1. Comment.js -> video 속성 생성 
+                -> type 은 mongoose.Schma.Types.ObjectId, ref: "Video"
+            방법2. Video.js -> comments[] array속성 생성
+                -> type 은 mongoose.Schma.Types.ObjectId, ref: "Comment"
+            [Relationship]
+            서로 다른 Schema를 가진 서로 다른 데이터가 문맥상(웹 상에서) 연관성을 가지고 있을 때 서로의 Schema를 ref를 통해 연결 시켜준다.
+            다만, 데이터를 통으로 연결 시켜주는 것이 아닌, id(=데이터의 이름)만 넘겨주는 방식.
+
+    #4.05 Home Controller Finished
+        
+        만든 Video, Comment Model을 어떻게 사용할 수 있을까?
+        간단하다. controllers folder로 가서 
+            1. import Video from "../models/Video"
+                -> 이건 DB의 element가 아니라 단지 model임. 아예 다름! 
+                    element를 받는 통로일 뿐이지. element자체는 아니다.
+            2. home 상수에 async 함수 추가 수정
+                ->  JS는 default로 나를 기다리게 프로그래밍 되어있지않음! 
+                async(Javascript 야 function의 어느부분은 꼭 기다려야해!라고 이야기하는것과같음) 
+            3. const videos = await Video.find({}); DB에 있는 모든 Video를 가져옴. 값을 다 받아서 주기전까지 . 
+                그리고 find말고도 할수 있는거 많음 find쳐보면 많이 나오니까 참고할 것
+                    해당과정이 성공적으로 끝나야 하는게 아니라 그냥 끝날 때까지 기다리는 것임!
+                    예를 들어 "에러"가 생기더라도 다음 render실행함. 왜냐면 끝났거든!
+                    error가 생기면 default로 잡아내지 못함. 이건 NodeJS문제임.
+                    그래서 "try catch"를 써야함!
+            4. try {내용} 
+                catch(error){
+                    console.log(error) 
+                    res.render("home", {pageTitle: "Home", videos:[]})
+                };
+                안쓰면 "에러"가 날경우 NodeJS가 진행되지않음....
+
+    #4.06 Uploading and Creating a Video
+
+        1. videoController.js 의 postupload 상수에 console.log(file, title, description)
+        2. npm start -> file upload -> file title description이 뜸. 
+            -> file의 location을 받아야함!
+        3. upload.pug -> input id="file"에서 accept="video/*" 
+            -> 이렇게하면 video가 아닌 파일은 선택불가능
+        
+            *파일URL을 반환하는 middleware (엄청 유명함!!)
+                -> npm install multer 
+                -> Upload.pug 
+                    -> form에 enctype="multipart/form-data"
+                -> middleware.js
+                    import multer from "multer";"
+                    const multerVideo = multer({ dest: "uploads/video/" });
+                        -> /uploads/video/ -> 이렇게 쓰면 내 컴퓨터의 root에 upload를 만듬
+                        -> 제일 앞에 /안쓰는게 좋음 이유: 해당 위치가 나의 project file안에 있는 directory라고 생각할 것이기 떄문
+                    export const uploadVideo = multerVideo.single("videoFile"); 
+                        -> single은 오직 하나의 파일만 upload 할 수 있다는 것을 의미!
+                -> videoRouter.js
+                    postUpload에 미들웨어 uploadVideo를 추가
+                -> videoController.js
+                    상수 postUpload에서 body의 body: { title, description}, file: {path}
+                    async추가 
+                    const newVideo = await Video.create({
+                        fileUrl: path, -> models/Video에서 작성한것들과 똑같이!
+                        title, -> 이 두개는 body에서 가져왔음
+                        description,
+                    });
+                    res.redirect(routes.videoDetail(newVideo.id));
+
+            First one upload on my videoFile!!
+
+    #4.07 Uploading and Creating a Video part Two
+        1. How to use and search MongoDB 
+            mongo 
+                -> help 치면 use datebace name 나오니
+                -> use we-tube 
+                -> show collections 치면 생성한 파일나옴 collections은 모델 같은 것.
+                -> db.파일명.remove({}) help 쳐서 보면 이게 삭제 키워드 
+            -> exit
+        2. app.js
+            - app.use("/uploads", express.static("uploads")) -> 그러니 이부분은 나중에 수정할꺼임
+                -> directory에서 file을 보내는 middleware
+                -> statc file은 주로 front-end에서 쓰이는 JS나 CSS 로고 파일임.
+                -> 그러니 user같은 생성된 content는 server와 분리되어야함.
+
+                    어떻게 moltat를 사용하는지 보여주고
+                    이 파일에 아마존 클라우드에 업로드하고 거기서 URL을 받아오는 거지.
+                    그러니 이렇게 파일을 내가 가지고 있으면 
+                    다른 유저가 엄청 큰 파일을 업로드 할 경우 내 server를 막을 수도 있음.
+                    이런 방식으로 file들을 다루는 건 문제가 너무 많아!
+                    한개의 서버에 다루는 건 말이지 NOOOOO!!!임
+        3. uploads directroy를 나의 .gitignore에 추가할 것.
+
+    #4.08 Getting Video by ID
+        
+        1. videoController.js
+            const videoDetail
+                    console.log(req.params) -> params = parameters
+                        ** url로 부터 정보를 가져오는 유일한 방법
+                            - routes.js에 저장된 const VIDEO_DETAIL ="/:id" 
+                                -> :을 붙이면 어떤 데이터를 가지고 있다고 표현하는 거임
+                    { id: asdajdjsjod } 
+                        -> 뜨는데 id 부분은 
+                            위의 routes.js의 VIDEO_DETAIL의 주소에 저장된 :다음의 부분이다.
+                    console.log 지우고 const videoDetail 에 async 추가
+                    const {
+                        params: {id}
+                    } = req;       
+                    // mongoose Queries -> https://mongoosejs.com/docs/queries.html
+                    try{
+                    const video = await Video.findById(id)
+                    console.log(video) -> 비디오를 잘 가져왔는지 확인 
+                    res.render("videoDetail", { pageTitle: video.title, video }); 
+                        -> 비디오 변수를 템플릿에 전달해야하니까 
+                    } catch (error){
+                        console.log(error)
+                        res.redirect(routes.home)
+                    }
+        2. videoDetail.pug
+            .video__player 
+                video(src=`/${video.fileUrl}`) 
+            .video__info 
+                a(href=routes.editVideo(video.id)) Edit Video
+                h5.video__title=video.title
+                span.video__views=video.views
+                p.video__description=video.description
+            .video__comments 
+                if video.comments.length === 1
+                    span.video__comment-number 1 comment 
+                else 
+                    span.video__comment-number #{video.comments.length} comments
+        3. routes.js 
+            editVideo: (id) => {
+                if (id) {
+                    return `/videos/${id}/edit`;
+                } else {
+                    return EDIT_VIDEO;
+                }
+            }, -> editVideo를 함수로 만들기
+
+    #4.09 Editing a Video 
+    
+        1. videoRouter.js
+            console.log(routes.editVideo) -> [Function: editVideo]
+            console.log(routes.editVideo()) -> /:id/edit
+            console.log(routes.editVideo(1122)) -> /videos/1122/edit
+        2. videoController.js
+            getEditVideo
+                const {
+                    params: { id },
+                } = req;
+                try {
+                    const video = await Video.findById(id);
+                    res.render("editVideo", { pageTitle: `Edit ${video.title}`, video });
+                } catch (error) {
+                    res.redirect(routes.home);
+                }
+            postEditVideo
+                const {
+                    params: { id },
+                    body: { title, description },
+                } = req;
+                try {
+                    await Video.findOneAndUpdate({ _id: id }, { title, description });
+                    res.redirect(routes.videoDetail(id));
+                } catch (error) {
+                    res.redirect(routes.home);
+                }
+        3. editVideo.pug
+            input(value=video.title) 추가 textarea()=video.description
+
+    #4.10 Deleting a Video
+    #4.11 Installing ESLint
+    #4.12 Searching Videos
+        regular expression
+ -->
