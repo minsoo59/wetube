@@ -1,78 +1,180 @@
 <!-- 
-    npm install webpack webpack-cli
-    npm install extract-text-webpack-plugin@next
-    npm install css-loader postcss-loader sass-loader
-    npm install autoprefixer
-    npm inatall node-sass
 
-    webpack.config.js 생성
-    package.json으로 와서 start명령어를 dev:server바꾸고
-    asset : 자산
-    dev:assets : "WEBPACK_ENV=development webpack"추가 -> 
-    build:assets : "WEBPACK_ENV=production webpack"추가 
+    https://velog.io/@since-1994/webpack
+    밑에는 공부를 위에 영상보면서 정리했지만, 향후 복습은 위의 블러그보고 하자!
 
+    #5.0 Introduction to Webpack
 
-    webpack은 서버코드랑 상관없음. 이건 명확하게 클라이언트 코드임.
-    즉, 우리가 앞서 예쁜 코드를 작성할 수 있도록 만든 babel-node는 아직 쓸 수 없음.
-    여기엔 옛날 자바스크립 코드를 써야함
+    이부분 강의부터 프론트엔드!!!!!!!!!! webpack은 module bundler임. 
+    webpack 
+        -> ES6, Scss 같은 최신코드 or 파일을 브라우저가 이해할 수 있도록 
+            호환이 되는 static파일로 변환해주는 것.
 
-    webpack.config.js에서
-    const path = require("path");
-    const autoprefixer = require("autoprefixer")
-    const ExtractCSS = require("extract-text-webpack-plugin")
+    Sass is sexy css.
 
-    const MODE = process.env.WEBPACK_ENV;
-    const ENTRY_FILE = path.resolve(__dirname, "assets", "js", "main.js")
-    const OUTPUT_DIR = path.join(__dirname, "static")
-    const config = {
-        entry : ENTRY_FILE,
-        mode : MODE,
-        module : {
-            rules: [
-                {
-                    test: /\.(scss)$/,
-                    use: ExtractCSS.extract([
-                        {
-                            loader: "css-loader"
-                        },
-                        {
-                            loader: "postcss-loader",
-                            option:{
-                                plugin(){
-                                    return [autoprefixer({ browsers: "cover 99.5%" })]
-                                }
-                            }
-                        },
-                        {
-                            loader: "sass-loader"
-                        }
-                    ])
-                }
-            ]
+    1. npm install webpack webpack-cli 
+        -> webpack파일에서 webpack을 사용하기 위함이고
+            webpack-cli은 터미널에서 webpack을 쓸 수 있게 해주는 것.
+    2. webpack.config.js 생성
+    3. package.json  
+        -> "scripts":{
+            "dev:server": ~~
+            "dev:assets": "webpack"
         }
-        output: {
-            path : OUTPUT_DIR
-            filename : "[name].[js]"
-        },
-        plugins: [new ExtractCSS("styles.css")]
-    };
+    4. webpack.config.js
+        -> 기본 규칙은 webpack은 exported configuration object를 찾는다는 것.
+            config 파일 안에서 명심해야 될 것은, server코드와는 연관시키지 않는다는 것.
+            이건 명확하게 클라이언트 코드임.
+            즉, 우리가 앞서 예쁜 코드를 작성할 수 있도록 만든 babel-node는 아직 쓸 수 없음.
+            여기엔 옛날 자바스크립 코드를 써야함.
 
-    module.exports = config;
-    assets 폴더 생성
-    그후 js폴더와 main.js 생성 
-    그후 js폴더안에 scss 폴더생성하고 styles.scss생성, 
-    scss 폴더안에 config폴더 생성 
-    config폴더안에 _variables.scss 생성
+            webpack은 두가지를 가지고 있음. (
+                entry -> 이 파일이 어디에서 왔나? 
+                output -> 그걸 어디에 넣을 것인가?
+            )
+            Node.js에는 파일과 경로(디렉토리)를 absolute로 만들어주는 방법이 있음.
+            다시말해, 컴퓨터나 서버에서의 전체경로를 갖게 되는 것. /user/~~~ 이런거. path로 할 수 있음.
+            path는 기본으로 깔려있는 nodejs패키지임
+        const path = require("path"); = import path from "path"     
 
-    main.js에서는 모던 js 문법써서 import
-    import "../scss/styles.scss"
+        const ENTRY_FILE = path.resolve(__dirname, "assets", "js", "main.js");
+            -> __dirname는 현프로젝트 디렉토리 이름. 어디에서든 접근 가능한 node.js 전역변수
+        const OUTPUT_DIR = path.join(__dirname, "static")    
+        const config = {
+            entry : ENTRY_FILE,
+            output: {
+                path: OUTPUT_DIR,
+                filename: "[name].js"
+            } -> output은 오브젝트여야하니까.
+        }
+        module.exports = config; <- 옛날코드를 써서 export
+    5. assets 파일 생성
+    6. js, scss 파일 생성(assets 파일안에)
+        js
+            1. main.js 생성 -> 모던 JS 써서 import
+                import "../scss/styles.scss"
+        scss
+            1. styles.scss 생성
+                body {
+                    background-color: red;
+                }
 
-    styles.scss
-    @import "/.config/_variables.scss";
-    body{
-        background-color:$bgColor;
-    }
+    경고가 뜸. 
+    mode 옵션이 설정이 안 되어서, webpack은 이 값에 대해 'production'으로 대체할 것입니다. 
+    mode 옵션을 'development' 또는 'production'으로 설정해주십시오.
+        -> 이유는 production을 만들 때, 내 코드는 압축이 됨.
+                개발하는 중에는 코드가 압축되지 않지. 
+                왜? 에러발생시, 발생지를 볼 수 있어야하니까!
+            development -> 개발 모드에서는 개발자가 보기 편하게 웹팩 로그나 결과물을 보여줌
+            production -> 배포 모드에서는 성능 최적화를 위해 기본적인 파일 압축등의 빌드 과정이 추가됨
 
-    _variables.scss
-    $bgColor: red;
+    #5.1 Styles with Webpack part One
+
+        1. 전에 .env 파일에서 dotenv 를 쓰기 위해 설정을 했었지. 
+            그리고 db.js파일에서 그걸 process.env.MONGO_URL <- 이런식으로 이용했었고,
+            그걸 수동으로 직접 설정해주는 방법이 있지.
+        2. package.json -> scripts
+            "dev:assets": "WEBPACK_ENV=development webpack" <- mode 설정해야하니까.
+            "build:assets": "WEBPACK_ENV=production webpack" <- 내 코드를 server에 올릴것
+        3. webpack.config.js
+            const ExtractCSS = require("extract-text-webpack-plugin");
+            const autoprefixer =require("autoprefixer")
+
+            const MODE = process.env.WEBPACK_ENV -> WEBPACK_ENV부분은 json파일에 쓴 거랑 똑같이 써야함 
+            const config = {
+                mode : MODE -> 돌리면 노란색 경고문은 이제 안뜸!
+                -> 그리고 여전히 failed인데 그건 webpack이 css부분을 이해하지 못해서임.
+                    그러니 rule을 주자
+                module: {
+                    rules : [ //config라는 오브젝트 안에 있는 array
+                        { // 네가 확장자인 scss인 파일을 만날때, loader실행
+                            // loader : webpack에게 파일을 처리하는 방법을 알려주는 역할.
+                            test: /\.(scss)$/,-> 테스트먼저 해야함. 이부분은 정규식써야함.이부분은 scss파일을 찾는거
+                            use:  ExtractCSS.extract([
+                                {
+                                    // loader 사용할때 아래에서부터 위로 시작함.
+                                    loader: "css-loader"
+                                },
+                                {
+                                    loader: "postcss-loader" 
+                                    option: {
+                                        plugins(){
+                                            return [autoprefixer({browsers: "cover 99.5%"})]
+                                        }
+                                    }
+                                        -> css를 받아서 우리가 얘한테 주는 plugin을 가지고 css를 변환해줌.
+                                },
+                                {
+                                    loader: "sass-loader"
+                                }
+                            ])
+                                -> 5. 설치한 extract-text-webpack-plugin 이게 있기때문에,
+                                    webpack에게 CSS를 가지고 뭘 어떻게 할지 알려줄 수 있음.
+                        }
+                    ]
+                },
+                plugins: [new ExtractCSS("styles.css")]
+            } 
+        4.  npm install extract-text-webpack-plugin@next
+            -> package.json 확인하면 ~beta 확인
+        6. scss 폴더안에 config 파일 생성 후 그 안에 _variables.scss 생성
+            $bgColor = red;
+        7. styles.scss
+            @import "/config/_variables.scss";
+                색깔 변수 $bgColor 변경
+
+        npm install css-loader postcss-loader sass-loader
+        npm install autoprefixer
+        npm inatall node-sass
+
+    #5.3 ES6 with Webpack 
+
+        1. main.js
+            const something = async() => {
+                console.log('something');
+            }
+        2. webpack.config.js
+            module:{
+                rules: [
+                    {
+                        test:/\.(js)$/,
+                        use: [
+                            {
+                                loader: "babel-loader" //npm install babel-loader
+                            }
+                        ]
+                    }
+                ]
+            }
+        3. package.json 
+            scripts 의 dev:assets에 -w 추가
+             watch를 의미하며 entry에 있는 파일들이 수정되는 걸 지켜본다는 뜻입니다. 
+             재실행하지 않아도 실시간으로 수정해줍니다.
+        4. main.pug
+                link(ref="stylesheet", href="/static/styles.css")
+            body
+                script(src="/static/main.js")
+        5. app.js
+            app.use("/static",express.static("static"))
+        6. _variables.scss
+            $sexyColor: peru;
+        7. styles.scss
+            $bgColor -> $sexyColor ---새로고침 누르면 바뀌는지 확인하기 위해!
+        8. npm i @babel/polyfill    
+            다 이해하지 못해도 됨!
+            그저 webpack.config.js 파일을 봤을때
+            상황이 어떻게 돌아가고 있는 건지 볼 줄 알면 돼!
+            내부에서 어떻게 동작하는지는 배울 필요 없음!
+        9. webpack.config.js
+            const config = {
+                entry: ["@babel/polyfill", ENTRY_FILE]
+                    -> 웹펙의 설정에 변화를 줬기 때문에, dev:assets를 다시 실행시켜야함.
+            }
+        10. .gitignore
+            static 포함
+            
+
+    asset : 자산
+
+
  -->

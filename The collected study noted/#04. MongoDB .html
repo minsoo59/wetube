@@ -237,7 +237,67 @@
             input(value=video.title) 추가 textarea()=video.description
 
     #4.10 Deleting a Video
+
+        1. routes.js
+            deleteVideo 함수 수정
+            if(id){
+                return `/videos/${id}/delete`;
+            }else{
+                return DELETE_VIDEO;
+            }
+        2. editVideo.pug 수정
+            a.form-container__link.form-container__link--delete(href=routes.deleteVideo(video.id))
+        3. videoController.js
+            const videoDetail의 render 함수 pageTitle : video.title로 수정
+        4. videoRouter.js
+            deleteVideo()로 수정
+        5. videoController.js
+            const deleteVideo {
+                const {
+                    params:{id}
+                } = req;
+                try{
+                    await Video.findOneAndRemove({ _id : id })
+                }catch(error){
+                    res.redirect(routes.home)
+                }
+            }
     #4.11 Installing ESLint
+            Complete setup
     #4.12 Searching Videos
-        regular expression
+            
+        regular expression -> https://regex101.com/library  /d -> digit(숫자) 
+        
+        1. videoController.js
+            const search {
+                const {
+                    query: { term : searchingBy }
+                } = req;
+                let videos = [];
+                try{
+                    videos = await Video.find({
+                        title : { $regex: searchingBy, $option: "i" }
+                            -> 그냥 쓰면 완전 똑같은 것만 검색되니까. 
+                                regular expression이용해서 제목을 찾아야함.
+                                $optiond에서 i 는 insensitive(덜 민감함)를 의미
+                        })
+                }catch(error){
+                    console.log(error)
+                }
+                res.render("search", { pageTitle: "Search", searchingBy, videos })
+            }
+        2. search.pug
+            .search__videos 
+                if videos.length === 0
+                    h5 No Videos Found
+                each item in videos 에서
+                    +videoBlock({
+                        id:item.id -> 추가
+                    })    
+        3. videoDetail.pug
+            .video__comments
+                if video.comments.length === 1
+                    span.video__comment-number 1 comment
+                else 
+                    span.video__comment-number #{video.comments.length} comments
  -->

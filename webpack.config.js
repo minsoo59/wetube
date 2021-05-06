@@ -2,26 +2,36 @@ const path = require("path");
 const autoprefixer = require("autoprefixer");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
+const ENTRY_FILE = path.resolve(__dirname, "assets", "js", "main.js");
+const OUTPUT_DIR = path.join(__dirname, "static");
+
 const mode = process.env.WEBPACK_ENV;
 
-module.exports = {
+const config = {
+  devtool: "cheap-module-source-map",
   mode,
-  entry: path.resolve(__dirname, "assets", "js", "main.js"),
+  entry: ["@babel/polyfill", ENTRY_FILE],
   output: {
     filename: "[name].js",
-    path: path.join(__dirname, "static"),
+    path: OUTPUT_DIR,
   },
   module: {
     rules: [
       {
         test: /\.(js)$/,
-        use: "babel-loader",
+        use: [
+          {
+            loader: "babel-loader",
+          },
+        ],
       },
       {
-        text: /\.(scss)$/,
+        test: /\.(scss)$/,
         use: [
           MiniCssExtractPlugin.loader,
-          "css-loader",
+          {
+            loader: "css-loader",
+          },
           {
             loader: "postcss-loader",
             options: {
@@ -30,7 +40,6 @@ module.exports = {
                   [
                     autoprefixer,
                     {
-                      // 변환될 코드의 target을 의미
                       overrideBrowserslist: "cover 99.5%",
                     },
                   ],
@@ -38,10 +47,13 @@ module.exports = {
               },
             },
           },
-          "sass-loader",
+          {
+            loader: "sass-loader",
+          },
         ],
       },
     ],
   },
   plugins: [new MiniCssExtractPlugin({ filename: "styles.css" })],
 };
+module.exports = config;
